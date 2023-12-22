@@ -73,6 +73,8 @@ def extract_coordinates_from_csv(file_path):
 async def main():
     coord_log = []
     current_time = datetime.now().strftime("%Y%m%d_%H-%M-%S")
+    log_file_name = f'logs/gpsNavLog_{current_time}.csv'
+    os.makedirs(os.path.dirname(log_file_name), exist_ok=True)
 
     robot = await connect()
     sensor_motion = MovementSensor.from_robot(robot, "gpsRight")
@@ -82,35 +84,14 @@ async def main():
     replay_file = os.environ.get('ENV_FILEPATH')
     GPSarray = extract_coordinates_from_csv(replay_file)
 
-    ackermann_bot = AckermannBot(robot)
-
-    for coords in GPSarray:
-        print(f"Going to {coords[0]}, {coords[1]}")
-        await ackermann_bot.navigate(ackermann_bot, sensor_motion, sensor_gps_right, sensor_gps_left, coords[0], coords[1], coord_log)
-
-
-    # pid_heading = PIDController(kp_heading, ki_heading, kd_heading, integral_max_heading, integral_min_heading)
-    # pid_target = PIDController(kp_target, ki_target, kd_target, integral_max_target, integral_min_target)
-    # pid_linear = PIDController(kp_linear, ki_linear, kd_linear, integral_max_linear, integral_min_linear)
-    # boxbot = BoxBot(robot)
-    #
-    # for x in GPSarray:
-    #     print('next point: ')
-    #     print(x[0])
-    #     print(", ")
-    #     print(x[1])
-    #     await boxbot.gotopoint(boxbot,sensor_gps,pid_heading, pid_target, pid_linear,sensor_motion,x[0],x[1],coord_log)
-
-    print(coord_log)
-
-    log_file_name = f'logs/gpsLog_{current_time}.log'
-    os.makedirs(os.path.dirname(log_file_name), exist_ok=True)
-
     with open(log_file_name, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(['latitude', 'longitude'])
-        csv_writer.writerows(coord_log)
-                    
+        ackermann_bot = AckermannBot(robot, csv_writer)
+
+        for coords in GPSarray:
+            print(f"Going to {coords[0]}, {coords[1]}")
+            await ackermann_bot.navigate(ackermann_bot, sensor_motion, sensor_gps_right, sensor_gps_left, coords[0], coords[1], coord_log)
+
 
 
 if __name__ == '__main__':
