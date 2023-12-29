@@ -181,7 +181,7 @@ class AckermannBot:
             print(f"Coordinates: {latitude_current}, {longitude_current}, {actual_heading}")
             print(f"Steer Angle: {steering_angle_degrees:07.3f}, Distance: {distance:09.6f}")
 
-            time.sleep(max(start_time + LOOP_PERIOD - time.time(), 0))
+            # time.sleep(max(start_time + LOOP_PERIOD - time.time(), 0))
 
         print("Target coordinates reached")
         await robot.base.stop()
